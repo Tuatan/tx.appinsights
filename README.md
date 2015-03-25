@@ -14,6 +14,12 @@ Currently 5 Application Insight types are supported:
 * Performace Counters
 * Exceptions.
 
+## Samples
+
+The samples are located in [Samples](./Samples/) folder.
+
+## Nugets
+
 The library is splitted into two nugets:
 
 - [Tx.AppInsights.Azure](http://www.nuget.org/packages/Tx.AppInsights.Azure/) allows you to query Azure Blob, dump files on disk and create queries against that. 
