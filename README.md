@@ -16,7 +16,7 @@ Currently 5 Application Insight types are supported:
 
 ## Samples
 
-The samples are located in [Samples](./Samples/) folder.
+LinqPad samples are located in [Samples](./Samples/) folder.
 
 ## Nugets
 
