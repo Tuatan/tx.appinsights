@@ -14,7 +14,7 @@ playback.AddApplicationInsightsFiles(
 // Define query
 playback
 	.GetObservable<Tx.ApplicationInsights.TelemetryType.PerformanceCounterEvent>()
-	.SelectMany(ie => ie.performanceCounter)
+	.SelectMany(ie => ie.PerformanceCounter)
 	.Dump();
 
 // Run the query
