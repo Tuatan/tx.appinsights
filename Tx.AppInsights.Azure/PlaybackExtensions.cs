@@ -39,7 +39,7 @@
             }
 
             playback.AddInput(
-                () => new CacheableReader().Read(connectionString, containerName, localFolder),
+                () => CacheableReader.Read(connectionString, containerName, localFolder),
                 typeof(PartitionableTypeMap));
         }
     }

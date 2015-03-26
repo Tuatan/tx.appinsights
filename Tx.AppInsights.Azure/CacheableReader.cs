@@ -11,9 +11,18 @@
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
 
-    internal class CacheableReader : JsonFileReader
+    internal class CacheableReader
     {
-        public IObservable<AppInsightsEnvelope> Read(
+        public static IObservable<AppInsightsEnvelope> Read(
+            string connectionString,
+            string containerName,
+            string localFolder)
+        {
+            return ReadAsEnumerable(connectionString, containerName, localFolder)
+                .ToObservable();
+        }
+
+        public static IEnumerable<AppInsightsEnvelope> ReadAsEnumerable(
             string connectionString,
             string containerName,
             string localFolder)
@@ -29,9 +38,8 @@
             return blobs
                 .OrderBy(i => i.Start)
                 .Select(i => Cache(i, container, localFolder))
-                .SelectMany(ReadFileSafe)
-                .Where(i => i != null)
-                .ToObservable();
+                .SelectMany(JsonFileReader.ReadFileSafe)
+                .Where(i => i != null);
         }
 
         private static string Cache(

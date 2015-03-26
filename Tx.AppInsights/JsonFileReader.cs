@@ -9,18 +9,23 @@
 
     using Newtonsoft.Json;
 
-    internal class JsonFileReader
+    internal static class JsonFileReader
     {
-        public IObservable<AppInsightsEnvelope> Read(params string[] folders)
+        internal static IEnumerable<AppInsightsEnvelope> ReadAsEnumerable(params string[] folders)
         {
             var blobs = folders
-                .SelectMany(this.ListFolder);
+                .SelectMany(ListFolder);
 
             return blobs
                 .OrderBy(i => i.Start)
                 .Select(i => i.Name)
                 .SelectMany(ReadFileSafe)
-                .Where(i => i != null)
+                .Where(i => i != null);
+        }
+
+        public static IObservable<AppInsightsEnvelope> Read(params string[] folders)
+        {
+            return ReadAsEnumerable(folders)
                 .ToObservable();
         }
 
@@ -111,7 +116,7 @@
             return result;
         }
 
-        private IEnumerable<BlobInfo> ListFolder(string folderName)
+        private static IEnumerable<BlobInfo> ListFolder(string folderName)
         {
             return Directory.EnumerateFiles(
                     folderName,

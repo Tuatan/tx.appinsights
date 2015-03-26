@@ -33,6 +33,14 @@ namespace Tx.ApplicationInsights
             this.map.Add(typeof(PerformanceCounterEvent), this.ParsePerformanceCounter);
         }
 
+        internal Dictionary<Type, Func<AppInsightsEnvelope, object>> Deserializers
+        {
+            get
+            {
+                return this.map;
+            }
+        }
+
         private PerformanceCounterEvent ParsePerformanceCounter(AppInsightsEnvelope envelope)
         {
             var result = this.ParseBase<PerformanceCounterEvent>(envelope);

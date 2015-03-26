@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppInsightsEnvelope.cs" />
+    <Compile Include="ApplicationInsightsFileStorage.cs" />
     <Compile Include="BlobInfo.cs" />
     <Compile Include="TelemetryType\PerformanceCounterEvent.cs" />
     <Compile Include="TelemetryType\RequestEvent.cs" />

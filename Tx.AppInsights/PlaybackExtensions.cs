@@ -15,7 +15,7 @@
             }
 
             playback.AddInput(
-                () => new JsonFileReader().Read(folders),
+                () => JsonFileReader.Read(folders),
                 typeof(PartitionableTypeMap));
         }
     }
