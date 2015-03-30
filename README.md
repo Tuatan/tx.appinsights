@@ -1,6 +1,6 @@
 # LINQ to Application Insights traces
 
-This library adds Application Insights support for Tx framework.
+This library adds Application Insights support for [Tx](http://tx.codeplex.com/) framework.
 
 If you set up a continious integration feature in the Applocation Insights portal you will have a storage with exported data.
 
