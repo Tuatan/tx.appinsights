@@ -4,6 +4,6 @@ namespace Tx.ApplicationInsights.TelemetryType
 
     public class TraceEvent : BaseEvent
     {
-        public TraceEventData[] message;
+        public TraceEventData[] Message;
     }
 }

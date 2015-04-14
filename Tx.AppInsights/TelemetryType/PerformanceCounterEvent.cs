@@ -4,6 +4,6 @@
 
     public class PerformanceCounterEvent : BaseEvent
     {
-        public PerformanceCounterEventData[] performanceCounter;
+        public PerformanceCounterEventData[] PerformanceCounter;
     }
 }

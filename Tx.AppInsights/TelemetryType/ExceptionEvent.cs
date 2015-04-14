@@ -4,6 +4,6 @@ namespace Tx.ApplicationInsights.TelemetryType
 
     public class ExceptionEvent : BaseEvent
     {
-        public ExceptionEventData[] basicException;
+        public ExceptionEventData[] BasicException;
     }
 }

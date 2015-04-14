@@ -4,6 +4,6 @@ namespace Tx.ApplicationInsights.TelemetryType
 
     public class CustomEvent : BaseEvent
     {
-        public CustomEventData[] @event;
+        public CustomEventData[] Event;
     }
 }

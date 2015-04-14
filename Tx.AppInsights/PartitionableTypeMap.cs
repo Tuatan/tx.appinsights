@@ -16,8 +16,6 @@ namespace Tx.ApplicationInsights
         private readonly Dictionary<Type, Func<AppInsightsEnvelope, object>> map = new Dictionary<Type, Func<AppInsightsEnvelope, object>>();
         private readonly Dictionary<Type, string> map2 = new Dictionary<Type, string>();
 
-        private readonly JsonSerializer serializer = new JsonSerializer();
-
         public PartitionableTypeMap()
         {
             this.map2.Add(typeof(TraceEvent), "message");
@@ -26,24 +24,38 @@ namespace Tx.ApplicationInsights
             this.map2.Add(typeof(RequestEvent), "request");
             this.map2.Add(typeof(PerformanceCounterEvent), "performanceCounter");
 
-            this.map.Add(typeof(TraceEvent), this.ParseTrace);
-            this.map.Add(typeof(CustomEvent), this.ParseCustomEvent);
-            this.map.Add(typeof(ExceptionEvent), this.ParseException);
-            this.map.Add(typeof(RequestEvent), this.ParseRequest);
-            this.map.Add(typeof(PerformanceCounterEvent), this.ParsePerformanceCounter);
+            this.map.Add(typeof(TraceEvent), e => Safe(e, ParseTrace));
+            this.map.Add(typeof(CustomEvent), e => Safe(e, ParseCustomEvent));
+            this.map.Add(typeof(ExceptionEvent), e => Safe(e, ParseException));
+            this.map.Add(typeof(RequestEvent), e => Safe(e, this.ParseRequest));
+            this.map.Add(typeof(PerformanceCounterEvent), e => Safe(e, this.ParsePerformanceCounter));
+        }
+
+        private static object Safe(AppInsightsEnvelope envelope, Func<AppInsightsEnvelope, object> transformer)
+        {
+            object result = null;
+
+            try
+            {
+                result = transformer(envelope);
+            }
+            catch (Exception)
+            {
+                // Add EventSource based tracing to track these errors
+            }
+
+            return result;
         }
 
         private PerformanceCounterEvent ParsePerformanceCounter(AppInsightsEnvelope envelope)
         {
-            var result = this.ParseBase<PerformanceCounterEvent>(envelope);
+            var result = ParseBase<PerformanceCounterEvent>(envelope);
 
             var json = envelope.Json.Substring(envelope.PropertyJsonStart, envelope.PropertyJsonLength);
 
             using (var stringReader = new StringReader(json))
             {
                 var reader = new JsonTextReader(stringReader);
-
-                //result.performanceCounter = this.serializer.Deserialize<PerformanceCounterEventData[]>(reader);
 
                 var counters = new List<PerformanceCounterEventData>();
 
@@ -90,90 +102,66 @@ namespace Tx.ApplicationInsights
                     });
                 }
 
-                result.performanceCounter = counters.ToArray();
+                result.PerformanceCounter = counters.ToArray();
             }
+
+            return result;
+        }
+
+        private static TEvent ParseEvent<TEvent, TEventData>(AppInsightsEnvelope envelope, Action<TEvent, TEventData> setter) where TEvent : BaseEvent, new()
+        {
+            var result = ParseBase<TEvent>(envelope);
+
+            var json = envelope.Json.Substring(envelope.PropertyJsonStart, envelope.PropertyJsonLength);
+
+            setter(result, JsonConvert.DeserializeObject<TEventData>(json));
 
             return result;
         }
 
         private RequestEvent ParseRequest(AppInsightsEnvelope envelope)
         {
-            var result = this.ParseBase<RequestEvent>(envelope);
-
-            using (var stringReader = new StringReader(
-                envelope.Json.Substring(envelope.PropertyJsonStart, envelope.PropertyJsonLength)))
-            {
-                var reader = new JsonTextReader(stringReader);
-
-                result.request = this.serializer.Deserialize<RequestEventData[]>(reader);
-            }
+            var result = ParseEvent<RequestEvent, RequestEventData[]>(
+                envelope,
+                (@event, datas) => @event.Request = datas);
 
             return result;
         }
 
-        private ExceptionEvent ParseException(AppInsightsEnvelope envelope)
+        private static ExceptionEvent ParseException(AppInsightsEnvelope envelope)
         {
-            var result = this.ParseBase<ExceptionEvent>(envelope);
-
-            using (var stringReader = new StringReader(
-                envelope.Json.Substring(envelope.PropertyJsonStart, envelope.PropertyJsonLength)))
-            {
-                var reader = new JsonTextReader(stringReader);
-
-                result.basicException = this.serializer.Deserialize<ExceptionEventData[]>(reader);
-            }
+            var result = ParseEvent<ExceptionEvent, ExceptionEventData[]>(
+                envelope,
+                (@event, datas) => @event.BasicException = datas);
 
             return result;
         }
 
-        private TraceEvent ParseTrace(AppInsightsEnvelope envelope)
+        private static TraceEvent ParseTrace(AppInsightsEnvelope envelope)
         {
-            var result = this.ParseBase<TraceEvent>(envelope);
-
-            using (var stringReader = new StringReader(
-                envelope.Json.Substring(envelope.PropertyJsonStart, envelope.PropertyJsonLength)))
-            {
-                var reader = new JsonTextReader(stringReader);
-
-                result.message = this.serializer.Deserialize<TraceEventData[]>(reader);
-            }
+            var result = ParseEvent<TraceEvent, TraceEventData[]>(
+                envelope, 
+                (@event, datas) => @event.Message = datas);
 
             return result;
         }
 
-        private CustomEvent ParseCustomEvent(AppInsightsEnvelope envelope)
+        private static CustomEvent ParseCustomEvent(AppInsightsEnvelope envelope)
         {
-            var result = this.ParseBase<CustomEvent>(envelope);
-
-            using (var stringReader = new StringReader(
-                envelope.Json.Substring(envelope.PropertyJsonStart, envelope.PropertyJsonLength)))
-            {
-                var reader = new JsonTextReader(stringReader);
-
-                result.@event = this.serializer.Deserialize<CustomEventData[]>(reader);
-            }
+            var result = ParseEvent<CustomEvent, CustomEventData[]>(
+                envelope,
+                (@event, datas) => @event.Event = datas);
 
             return result;
         }
 
-        private T ParseBase<T>(AppInsightsEnvelope envelope) where T : BaseEvent, new()
+        private static T ParseBase<T>(AppInsightsEnvelope envelope) where T : BaseEvent, new()
         {
             var result = new T();
 
-            //using (var stringReader = new StringReader(envelope.Json.Substring(envelope.InternalJsonStart, envelope.InternalJsonLength)))
-            //{
-            //    var reader = new JsonTextReader(stringReader);
+            var json = envelope.Json.Substring(envelope.ContextJsonStart, envelope.ContextJsonLength);
 
-            //    result.@internal = this.serializer.Deserialize<Internal>(reader);
-            //}
-
-            using (var stringReader = new StringReader(
-                envelope.Json.Substring(envelope.ContextJsonStart, envelope.ContextJsonLength)))
-            {
-                var reader = new JsonTextReader(stringReader);
-
-                result.Context = this.serializer.Deserialize<Context>(reader);
-            }
+            result.Context = JsonConvert.DeserializeObject<Context>(json);
 
             return result;
         }
@@ -184,7 +172,7 @@ namespace Tx.ApplicationInsights
 
             if (!this.map.TryGetValue(outputType, out key))
             {
-                key = (envelope) => null;
+                key = envelope => null;
             }
 
             return key;

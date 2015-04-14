@@ -4,6 +4,6 @@
 
     public class RequestEvent : BaseEvent
     {
-        public RequestEventData[] request;
+        public RequestEventData[] Request;
     }
 }
