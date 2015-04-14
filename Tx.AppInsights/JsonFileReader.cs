@@ -37,6 +37,7 @@
             }
             catch (Exception e)
             {
+                // Add EventSource based tracing to track these errors
                 return Enumerable.Empty<AppInsightsEnvelope>();
             }
         }
@@ -60,6 +61,7 @@
             }
             catch (Exception e)
             {
+                // Add EventSource based tracing to track these errors
                 return null;
             }
         }
@@ -152,6 +154,7 @@
                         };
                     }
 
+                    // Add EventSource based tracing to track these errors
                     return (BlobInfo)null;
                 })
                 .Where(i => i != null);
