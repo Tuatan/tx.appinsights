@@ -7,6 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tx.AppInsights.Azure", "Tx.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tx.AppInsights", "Tx.AppInsights\Tx.AppInsights.csproj", "{D309E1BB-AED8-4CA1-A55A-695513CE884F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{419F6762-19F2-4CBC-A8B2-F90D4D54F81F}"
+	ProjectSection(SolutionItems) = preProject
+		Samples\ReadFromAzure.linq = Samples\ReadFromAzure.linq
+		Samples\ReadFromFiles.linq = Samples\ReadFromFiles.linq
+		Samples\TxReadFromFiles.linq = Samples\TxReadFromFiles.linq
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
