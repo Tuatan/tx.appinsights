@@ -7,7 +7,6 @@
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
-
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
 
