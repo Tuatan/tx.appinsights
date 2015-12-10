@@ -1,0 +1,2 @@
+language: csharp
+solution: Linq2AppInsights.sln
