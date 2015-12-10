@@ -1,3 +1,5 @@
+![build](https://travis-ci.org/Tuatan/tx.appinsights.svg?branch=master)
+
 # LINQ to Application Insights traces
 
 This library adds Application Insights support for [Tx](http://tx.codeplex.com/) framework.
